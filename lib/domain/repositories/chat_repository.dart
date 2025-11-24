@@ -1,0 +1,7 @@
+import 'package:app_tasking/domain/entities/chat.dart';
+
+abstract class ChatRepository {
+  Future<List<Chat>> getListChats(
+    String personalId,
+  );
+}

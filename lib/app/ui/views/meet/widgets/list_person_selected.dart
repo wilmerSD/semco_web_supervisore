@@ -15,11 +15,11 @@ class ListPersonSelected extends StatelessWidget {
     final meetProvider = Provider.of<MeetProvider>(context);
     return AnimatedContainer(
       duration: const Duration(milliseconds: 250),
-      height:  60,//meetProvider.personSelected.isEmpty ? 0.0 : 85,
+      height: 60, //meetProvider.personSelected.isEmpty ? 0.0 : 85,
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8.0),
-          // color: Colors.red
-          ),
+        borderRadius: BorderRadius.circular(8.0),
+        // color: Colors.red
+      ),
       child: RefreshIndicator(
         onRefresh: () async {},
         child: ListView.builder(
@@ -65,6 +65,8 @@ class ListPersonSelected extends StatelessWidget {
                                 onTap: () {
                                   meetProvider
                                       .removeOrAddPersonSelected(dataPerson);
+                                  meetProvider
+                                      .removeOrAddPeopleToAgenda(dataPerson);
                                   meetProvider.scrollToBottom();
                                 },
                                 child: CircleAvatar(

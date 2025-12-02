@@ -67,13 +67,13 @@ class _WebDatePickerFieldState extends State<WebDatePickerField> {
           : const SizedBox(),
       Expanded(
         child: TextField(
-          style: AppTextStyle(context)
-                .bold13(color: AppColors.textBasic(context)),
+          style:
+              AppTextStyle(context).bold13(color: AppColors.textBasic(context)),
           key: _keyField,
           controller: widget.controller,
           readOnly: true,
           decoration: AppDecorators.inputDecorationGen(
-              context, 'Fecha', widget.label ?? '', null),
+              context, 'Fecha', widget.label ?? '', null, widget.isMandatory),
           onTap: () async {
             final result = await showWebDatePicker(
               backgroundColor: AppColors.backgroundColor(context),

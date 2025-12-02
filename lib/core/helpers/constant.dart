@@ -63,6 +63,9 @@ const kLogoSizeSmall = 60.0;
 const kIconSize = 30.0;
 const kIconSizeSmall = 18.0;
 
+///Dropdown
+const kDropdownHeight = 50.0;
+
 //Links
 const instagramLink = "https://instagram.com/ecxlae.oficial/";
 const tiktokLink = "https://www.tiktok.com/@ecxlae.oficial";

@@ -1,4 +1,5 @@
 import "package:app_tasking/app/ui/components/toast/toast.dart";
+import "package:app_tasking/core/helpers/enums.dart";
 import "package:app_tasking/core/helpers/helpers.dart";
 import "package:app_tasking/core/helpers/keys.dart";
 import "package:app_tasking/domain/entities/agenda.dart";
@@ -66,6 +67,8 @@ class MeetProvider with ChangeNotifier {
   TextEditingController ctrlTittleAgenda = TextEditingController(text: '');
   TextEditingController ctrlMeetingPlace = TextEditingController(text: '');
 
+  List<Project> onsearchProjectsAgenda = [];
+
   DateTime dateMeet = DateTime.now();
   DateTime timeMeet = DateTime.now();
   Duration duration = const Duration(minutes: 30);
@@ -79,11 +82,14 @@ class MeetProvider with ChangeNotifier {
   List<OptionSelectModel> listModeOfMeet = [
     OptionSelectModel(id: '0', text: 'Online'),
     OptionSelectModel(id: '1', text: 'Presencial'),
+    OptionSelectModel(id: '2', text: 'Híbrido'),
   ];
 
   List<OptionSelectModel> listPlaceMeet = [
-    OptionSelectModel(id: '0', text: 'zoom'),
-    OptionSelectModel(id: '1', text: 'Otros'),
+    OptionSelectModel(id: '0', text: 'Zoom'),
+    OptionSelectModel(id: '1', text: 'Meet'),
+    OptionSelectModel(id: '2', text: 'Teams'),
+    OptionSelectModel(id: '3', text: 'Otro'),
   ];
 
   List<OptionSelectModel> lisTypeAgreement = [
@@ -92,10 +98,13 @@ class MeetProvider with ChangeNotifier {
     OptionSelectModel(id: 'Tarea', text: 'Tarea'),
   ];
 
-  List<OptionSelectModel> lisTypePrivacityAgreement = [
-    OptionSelectModel(id: 'Publica', text: 'Pública'),
-    OptionSelectModel(id: 'Privada', text: 'Privada'),
-  ];
+  // List<OptionSelectModel> lisTypePrivacityAgreement = [
+  //   OptionSelectModel(id: 'Publica', text: 'Pública'),
+  //   OptionSelectModel(id: 'Privada', text: 'Privada'),
+  // ];
+  final lisTypePrivacityAgreement =
+      PrivacityType.values.map((e) => e.toOption()).toList();
+
   Area clientMeet = Area(
     clienteId: '0',
     clienteNombre: 'Seleccionar',
@@ -148,6 +157,20 @@ class MeetProvider with ChangeNotifier {
 
   void updateselectedColor(Color color) {
     selectedColor = color;
+    notifyListeners();
+  }
+
+  void setProjects(List<Project> projects) {
+    listProjects = projects;
+    onsearchProjectsAgenda = List.from(projects);
+    notifyListeners();
+  }
+
+  void filterProjects(String query) {
+    onsearchProjectsAgenda = listProjects
+        .where(
+            (p) => p.campanaNombre!.toLowerCase().contains(query.toLowerCase()))
+        .toList();
     notifyListeners();
   }
 
@@ -268,18 +291,22 @@ class MeetProvider with ChangeNotifier {
         reunionId: '',
         reunionTitulo: tittleMeet.text,
         reunionAsunto: subjectMeet.text,
-        reunionModalidad: modeOfMeet.text,
-        reunionLugar: placeMeet.text,
+        reunionModalidad: showAdvanceInputs ? modeOfMeet.text : '',
+        reunionLugar: showAdvanceInputs
+            ? ctrlMeetingPlace.text
+            : '', //Lugar de la reunión
         reunionClase:
             '', //Revisar aqui se guarda si es en base a un proyecto o algo
         reunionGrupoPro: '',
         reuniomAreaConoci: '',
-        reunionClienteId: clientMeet.clienteId,
-        reunionClienteNombre: clientMeet.clienteNombre,
-        reunionProyectoId:
-            projectMeet.campanaid == '0' ? '' : projectMeet.campanaid,
-        reunionProyectoNombre:
-            projectMeet.campanaid == '0' ? '' : projectMeet.campanaNombre,
+        reunionClienteId: showAdvanceInputs ? clientMeet.clienteId : '',
+        reunionClienteNombre: showAdvanceInputs ? clientMeet.clienteNombre : '',
+        reunionProyectoId: showAdvanceInputs
+            ? (projectMeet.campanaid == '0' ? '' : projectMeet.campanaid)
+            : '',
+        reunionProyectoNombre: showAdvanceInputs
+            ? (projectMeet.campanaid == '0' ? '' : projectMeet.campanaNombre)
+            : '',
 
         reunionFecha: DateFormat('dd/MM/yyyy').parse(ctrlDateMeet.text),
         // reunionHoraIni: "2025-09-05T14:40:00",
@@ -304,9 +331,12 @@ class MeetProvider with ChangeNotifier {
         // reunionText02: ,//libre
         reunionText03:
             personalId, //libre Lo usaré para guardar a la persona que creo la reunión
-        reunionText04: Helpers.colorToHex(selectedColor),
-        reunionText05: typeOfMeet.text, //Abierto o Cerrado
-        reunionText06: ctrlMeetingPlace.text, //Lugar de la reunión
+        reunionText04:
+            showAdvanceInputs ? Helpers.colorToHex(selectedColor) : '',
+        reunionText05:
+            showAdvanceInputs ? typeOfMeet.text : 'Abierto', //Abierto o Cerrado
+        reunionText06:
+            showAdvanceInputs ? placeMeet.text : '', //Modalidad de la reunión
         reunionText07: inBaseMeetId, //Enviar el id del cual esta siendo creado
         // reunionFec03: ,//Libre
         // reunionesSdtListPerProSer: , //Solo guardare los ids de las personas participantes
@@ -353,6 +383,9 @@ class MeetProvider with ChangeNotifier {
       clearValuesToNewMeet();
       //Pedir de nuevo la agenda
       //Pedir participantes
+      getParticipants(meetModel.reunionId ?? '');
+      getAgenda(meetModel.reunionId ?? '');
+      //Todo crear una funcion para traer detalles de la reunion
     } catch (e) {
       debugPrint(e.toString());
     } finally {
@@ -393,18 +426,20 @@ class MeetProvider with ChangeNotifier {
       reunionId: meet != null ? meet.reunionId : '',
       reunionTitulo: tittleMeet.text,
       reunionAsunto: subjectMeet.text,
-      reunionModalidad: modeOfMeet.text,
-      reunionLugar: placeMeet.text,
+      reunionModalidad: showAdvanceInputs ? modeOfMeet.text : '',
+      reunionLugar: showAdvanceInputs ? ctrlMeetingPlace.text : '',
       reunionClase:
           '', //Revisar aqui se guarda si es en base a un proyecto o algo
       reunionGrupoPro: '',
       reuniomAreaConoci: '',
-      reunionClienteId: clientMeet.clienteId,
-      reunionClienteNombre: clientMeet.clienteNombre,
-      reunionProyectoId:
-          projectMeet.campanaid == '0' ? '' : projectMeet.campanaid,
-      reunionProyectoNombre:
-          projectMeet.campanaid == '0' ? '' : projectMeet.campanaNombre,
+      reunionClienteId: showAdvanceInputs ? clientMeet.clienteId : '',
+      reunionClienteNombre: showAdvanceInputs ? clientMeet.clienteNombre : '',
+      reunionProyectoId: showAdvanceInputs
+          ? (projectMeet.campanaid == '0' ? '' : projectMeet.campanaid)
+          : '',
+      reunionProyectoNombre: showAdvanceInputs
+          ? (projectMeet.campanaid == '0' ? '' : projectMeet.campanaNombre)
+          : '',
 
       reunionFecha: DateFormat('dd/MM/yyyy').parse(ctrlDateMeet.text),
       // reunionHoraIni: "2025-09-05T14:40:00",
@@ -429,10 +464,14 @@ class MeetProvider with ChangeNotifier {
       // reunionText02: ,//libre
       reunionText03:
           personalId, //libre Lo usaré para guardar a la persona que creo la reunión
-      reunionText04: Helpers.colorToHex(selectedColor),
-      reunionText05: typeOfMeet.text, //Abierto o Cerrado
-      reunionText06: ctrlMeetingPlace.text, //Lugar de la reunión
-      reunionText07: inBaseMeetId, //Enviar el id del cual esta siendo creado
+      reunionText04: showAdvanceInputs ? Helpers.colorToHex(selectedColor) : '',
+      reunionText05:
+          showAdvanceInputs ? typeOfMeet.text : '', //Abierto o Cerrado
+      reunionText06:
+          showAdvanceInputs ? placeMeet.text : '', //Plataforma de reunión
+      reunionText07: showAdvanceInputs
+          ? inBaseMeetId
+          : '', //Enviar el id del cual esta siendo creado
       // reunionFec03: ,//Libre
       // reunionesSdtListPerProSer: , //Solo guardare los ids de las personas participantes
       renDet: withAgenda ? agendaModels : null,
@@ -481,12 +520,21 @@ class MeetProvider with ChangeNotifier {
     campanaNombre: 'Seleccionar',
   );
   bool isGettingListProjects = false;
-  Future<void> getListProjects() async {
+  Future<void> getListProjects([String? areaId]) async {
+    // listProjects.clear();
+    listProjects = [
+      Project(
+        campanaid: '0',
+        campanaNombre: 'Seleccionar',
+      )
+    ];
     isGettingListProjects = true;
+    notifyListeners();
     try {
-      final response =
-          await projectRepositoryImpl.getListProyects(ProjectModel());
+      final response = await projectRepositoryImpl
+          .getListProyects(ProjectModel(clienteId: areaId));
       listProjects.addAll(response);
+      setProjects(listProjects);
     } catch (e) {
       debugPrint(e.toString());
     } finally {
@@ -511,31 +559,29 @@ class MeetProvider with ChangeNotifier {
     personalId: '-1',
     personalNombreCompleto: 'Seleccionar',
   );
-
-  bool isGettinPerons = false;
+  List<Person> listPersonToAgenda = [];
+  bool isGettinPeople = false;
   Future<void> getListPerson() async {
-    isGettinPerons = true;
+    isGettinPeople = true;
     // listPerson.clear();
     try {
       final response = await personRepositoryImpl.getListPersons();
-      listPerson.addAll(response);
-      listPersonResponsible.addAll(response);
+      listPerson.addAll(response); //Para lista de participantes
+      listPersonResponsible.addAll(response); //Para lista de responsables
       if (listPerson.isNotEmpty) {
-        final first = listPerson.first;
-        personAgenda = Person(
-            personalId: first.personalId ?? '',
-            personalNombreCompleto: first.personalNombreCompleto ?? '');
+        personAgenda = Person(personalId: personalId);
       }
       if (listPersonResponsible.isNotEmpty) {
-        final first = listPerson.first;
-        person = Person(
-            personalId: first.personalId ?? '',
-            personalNombreCompleto: first.personalNombreCompleto ?? '');
+        personResponsible = listPersonResponsible.firstWhere(
+          (p) => p.personalId == personalId,
+          orElse: () => listPersonResponsible.first,
+        );
+        removeOrAddPeopleToAgenda(personResponsible);
       }
     } catch (e) {
       debugPrint(e.toString());
     } finally {
-      isGettinPerons = false;
+      isGettinPeople = false;
       notifyListeners();
     }
   }
@@ -560,6 +606,28 @@ class MeetProvider with ChangeNotifier {
       personSelected.add(iPersonSelected);
     }
     print("paso por aqui agregar");
+    notifyListeners();
+  }
+
+  void removeOrAddPeopleToAgenda(Person iPersonSelected) {
+    //Poner validador para que no elimine al responsable
+    if (listPersonToAgenda.contains(iPersonSelected)) {
+      if (iPersonSelected.personalId == personResponsible.personalId) {
+        return;
+      }
+      listPersonToAgenda.remove(iPersonSelected);
+    } else {
+      listPersonToAgenda.add(iPersonSelected);
+    }
+    notifyListeners();
+  }
+
+  void removeAndAddPersonToAgenda(
+      Person oldPersonSelected, Person newPersonSelected) {
+    if (listPersonToAgenda.contains(oldPersonSelected)) {
+      listPersonToAgenda.remove(oldPersonSelected);
+    }
+    listPersonToAgenda.add(newPersonSelected);
     notifyListeners();
   }
 
@@ -687,16 +755,17 @@ class MeetProvider with ChangeNotifier {
   }
 
   void clearValuesToNewMeet() {
+    print("Función de ejecutar variables se esta ejecutando");
     inBaseMeetId = '';
     tittleMeet.text = '';
     subjectMeet.text = '';
     typeOfMeet = OptionSelectModel(id: '0', text: 'Abierta');
     modeOfMeet = OptionSelectModel(id: '0', text: 'Online');
     placeMeet = OptionSelectModel(id: '0', text: 'Zoom');
-    personResponsible = Person(
-      personalId: '-1',
-      personalNombreCompleto: 'Seleccionar',
-    );
+    // personResponsible = Person(
+    //   personalId: '-1',
+    //   personalNombreCompleto: 'Seleccionar',
+    // );
     clientMeet = Area(
       clienteId: '0',
       clienteNombre: 'Seleccionar',
@@ -731,6 +800,7 @@ class MeetProvider with ChangeNotifier {
   String inBaseMeetId = '';
   Future<void> toCreateInBaseMeet(Meet meet, {bool isEdit = false}) async {
     listAgendaAdd.clear();
+    showAdvanceInputs = true;
     inBaseMeetId = meet.reunionId ?? '';
     tittleMeet.text = meet.reunionTitulo ?? '';
     subjectMeet.text = meet.reunionAsunto ?? '';
@@ -740,8 +810,10 @@ class MeetProvider with ChangeNotifier {
     placeMeet = placeMeet.copyWith(text: meet.reunionLugar ?? '');
 
     clientMeet.clienteId = meet.reunionClienteId ?? '';
+    print('clienteId ${clientMeet.clienteId}');
     clientMeet.clienteNombre = meet.reunionClienteNombre ?? '';
     projectMeet.campanaid = meet.reunionProyectoId ?? '';
+    print('campanaid ${projectMeet.campanaid}');
     projectMeet.campanaNombre = meet.reunionProyectoNombre ?? '';
     ctrlDateMeet = TextEditingController(
         text: Helpers.dateToStringTimeDMY(DateTime.now()));
@@ -752,6 +824,7 @@ class MeetProvider with ChangeNotifier {
     personResponsible.personalNombreCompleto = meet.reunionConvocanteNom ?? '';
     selectedColor =
         Helpers.hexToColor(meet.color); //Aun no se pasa bien a la ui revisar
+    ctrlMeetingPlace.text = meet.reunionLugar ?? '';
     // print(meet.reunionParticipantes);
     // final participantes = jsonDecode(meet.reunionParticipantes ?? '') as List;
     // personSelected
@@ -759,7 +832,7 @@ class MeetProvider with ChangeNotifier {
     // final rawParticipantes = meet.reunionParticipantes;
     // final rawParticipantes = meet.reunionParticipantes;
     //   void toCreateInBaseMeet(Meet meet) {
-    mapMeetParticipantsToPersonList(meet);
+    mapMeetParticipantsToPersonList(meet, isEdit: isEdit);
     // listAgendaAdd = meet.
     // List participantes = [];
     // if (rawParticipantes != null && rawParticipantes.trim().isNotEmpty) {
@@ -793,35 +866,45 @@ class MeetProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void mapMeetParticipantsToPersonList(Meet meet) {
+  void mapMeetParticipantsToPersonList(Meet meet, {bool isEdit = false}) {
     personSelected.clear();
     print(meet.reunionParticipantes);
     print('reunion participantes');
-    // Validar si reunionParticipantes tiene valor
-    if (meet.reunionParticipantes == null ||
-        meet.reunionParticipantes!.isEmpty) {
-      return; // No hay nada que mapear
+
+    List<String> ids = [];
+    if (isEdit == true) {
+      print('cantidad participantes ${participantsDetail.length}');
+      if (participantsDetail.isEmpty) return;
+      ids = participantsDetail.map((p) => p.personalId ?? '').toList();
+      print('ids ${ids.length}');
+    } else {
+      // Validar si reunionParticipantes tiene valor
+      if (meet.reunionParticipantes == null ||
+          meet.reunionParticipantes!.isEmpty) {
+        return; // No hay nada que mapear
+      }
+      // 1️⃣ Obtener los IDs del string, limpiando espacios
+      ids = meet.reunionParticipantes!
+          .split(',')
+          .map((id) => id.trim())
+          .where((id) => id.isNotEmpty)
+          .toList();
     }
-
-    // 1️⃣ Obtener los IDs del string, limpiando espacios
-    List<String> ids = meet.reunionParticipantes!
-        .split(',')
-        .map((id) => id.trim())
-        .where((id) => id.isNotEmpty)
-        .toList();
-
     // 2️⃣ Buscar los objetos que coinciden en listPerson
     for (var id in ids) {
+      print('personSelected ${personSelected.length}');
       final person = listPerson.firstWhere(
         (p) => p.personalId == id,
         orElse: () => Person(), // 👈 devuelve objeto vacío o maneja null
       );
-
+      print('personSelected ${personSelected.length}');
       // Si tienes un constructor vacío o un check de id:
       if (person.personalId != null) {
         if (person.personalId!.isNotEmpty) personSelected.add(person);
       }
+      print('personSelected ${personSelected.length}');
     }
+    print('personSelected ${personSelected.length}');
   }
 
   List<Task> listTaskAgenda = [

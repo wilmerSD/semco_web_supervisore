@@ -15,4 +15,16 @@ class AgreementRepositoryImpl extends AgreementRepository {
   Future<List<Agreement>> getAgreements(String reunionId, int agendaId) {
     return agreementDatasource.getAgreements(reunionId, agendaId);
   }
+
+  @override
+  Future<bool> deleteAgreement(
+      String reunionId, int agendaId, String agreementId) {
+    return agreementDatasource.deleteAgreement(
+        reunionId, agendaId, agreementId);
+  }
+
+  @override
+  Future<Agreement?> updateAgreement(AgreementModel agreement) {
+    return agreementDatasource.updateAgreement(agreement);
+  }
 }

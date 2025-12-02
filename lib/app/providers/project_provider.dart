@@ -28,7 +28,8 @@ class ProjectProviderP extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> getListProjects() async {
+  Future<void> getListProjects(
+      BuildContext context, ProjectModel project) async {
     isGettingListProjects = true;
     try {
       final response =

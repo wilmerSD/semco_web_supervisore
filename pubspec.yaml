@@ -59,6 +59,7 @@ dependencies:
   card_swiper: ^3.0.1
   carousel_slider: ^5.1.1
   timelines_plus: ^1.0.8
+  timelines: ^0.1.0
 
 dev_dependencies:
   flutter_test:

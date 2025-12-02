@@ -10,7 +10,7 @@ class InputGen extends StatelessWidget {
     this.textEditingController,
     required this.onChanged,
     super.key,
-    required this.labelText,
+    this.labelText,
     required this.hintText,
     this.helperText,
     this.icon,
@@ -20,7 +20,7 @@ class InputGen extends StatelessWidget {
   });
   final TextEditingController? textEditingController;
   final Function(String) onChanged;
-  final String labelText;
+  final String? labelText;
   final String hintText;
   final String? helperText;
   final IconData? icon;
@@ -30,81 +30,48 @@ class InputGen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Row(
       children: [
         helperText != null
-            ? Column(
+            ? Row(
                 children: [
-                  Row(
-                    children: [
-                      icon != null
-                          ? Row(
-                              children: [
-                                Icon(icon, size: 12.0),
-                                const SizedBox(
-                                  width: 3.0,
-                                )
-                              ],
+                  icon != null
+                      ? Row(
+                          children: [
+                            Icon(icon, size: 12.0),
+                            const SizedBox(
+                              width: 3.0,
                             )
-                          : const SizedBox(),
-                      Text(helperText!),
-                      isMandatory ? const Text('*') : const SizedBox(),
-                    ],
+                          ],
+                        )
+                      : const SizedBox(),
+                  Text(helperText!),
+                  isMandatory
+                      ? const Text(
+                          '*',
+                          style: TextStyle(color: Colors.red),
+                        )
+                      : const SizedBox(),
+                  const SizedBox(
+                    width: 4.0,
                   ),
-                  const SizedBox(height: 4.0),
                 ],
               )
             : const SizedBox(),
-        TextFormField(
-            style: AppTextStyle(context)
-                .bold13(color: AppColors.textBasic(context)),
-            inputFormatters: inputFormats,
-            onChanged: (value) => onChanged(value),
-            controller: textEditingController,
-            textAlignVertical: TextAlignVertical.center,
-            keyboardType: TextInputType.multiline,
-            maxLines: 1,
-            minLines: 1,
-            decoration: InputDecoration(
-              counterText: "",
-              filled: false,
-              isDense: true,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 10.0,
-                vertical: 12.0,
-              ),
-              //floatingLabelBehavior: FloatingLabelBehavior.always,
-              suffixIconColor: AppColors.primary(context),
-              floatingLabelStyle: AppTextStyle(context).medium14(
-                color: AppColors.grayBlue,
-              ),
-              labelStyle: AppTextStyle(context).medium14(
-                color: AppColors.grayBlue,
-              ),
-              hintText: hintText,
-              hintStyle: AppTextStyle(context).medium14(
-                color: AppColors.black,
-              ),
-              labelText: labelText,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(kRadiusMin),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(kRadiusMin),
-                borderSide: const BorderSide(
-                  width: 1.0,
-                  color: AppColors.grayLight,
-                ),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(kRadiusMin),
-                borderSide: BorderSide(
-                  width: 0.5,
-                  color: AppColors.primary(context),
-                ),
-              ),
-              suffixIcon: suffixIcon,
-            )),
+        Expanded(
+          child: TextFormField(
+              style: AppTextStyle(context)
+                  .bold13(color: AppColors.textBasic(context)),
+              inputFormatters: inputFormats,
+              onChanged: (value) => onChanged(value),
+              controller: textEditingController,
+              textAlignVertical: TextAlignVertical.center,
+              keyboardType: TextInputType.multiline,
+              maxLines: 1,
+              minLines: 1,
+              decoration: AppDecorators.inputDecorationGen(
+                  context, hintText, labelText ?? '', suffixIcon, isMandatory)),
+        ),
       ],
     );
   }

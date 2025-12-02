@@ -10,6 +10,8 @@ class OptionSelect extends StatelessWidget {
     return Text(
       nameOption ?? "",
       style: AppTextStyle(context).bold13(color: AppColors.textBasic(context)),
+      overflow: TextOverflow.ellipsis,
+      maxLines: 2,
     );
   }
 }

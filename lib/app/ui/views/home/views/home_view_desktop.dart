@@ -13,6 +13,7 @@ import 'package:app_tasking/core/theme/app_colors.dart';
 import 'package:app_tasking/core/theme/app_text_style.dart';
 import 'package:app_tasking/domain/entities/project.dart';
 import 'package:app_tasking/infrastructure/models/option__select_model.dart';
+import 'package:app_tasking/infrastructure/models/project_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_expandable_table/flutter_expandable_table.dart';
 import 'package:icons_plus/icons_plus.dart';
@@ -25,7 +26,7 @@ class HomeViewDesktop extends StatelessWidget {
   Widget build(BuildContext context) {
     final homeProvider = Provider.of<HomeProvider>(context);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ProjectProviderP>().getListProjects();
+      context.read<ProjectProviderP>().getListProjects(context, ProjectModel());
     });
     // Widget search = SizedBox(
     //   height: 40.0,

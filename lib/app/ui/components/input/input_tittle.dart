@@ -9,7 +9,7 @@ class InputTittle extends StatelessWidget {
     this.textEditingController,
     required this.onChanged,
     super.key,
-    required this.labelText,
+    this.labelText,
     required this.hintText,
     this.helperText,
     this.icon,
@@ -19,7 +19,7 @@ class InputTittle extends StatelessWidget {
   });
   final TextEditingController? textEditingController;
   final Function(String) onChanged;
-  final String labelText;
+  final String? labelText;
   final String hintText;
   final String? helperText;
   final IconData? icon;
@@ -69,7 +69,7 @@ class InputTittle extends StatelessWidget {
               maxLines: 1,
               minLines: 1,
               decoration: AppDecorators.inputDecorationGen(
-                  context, hintText, labelText, suffixIcon)),
+                  context, hintText, labelText ?? '', suffixIcon, isMandatory)),
         ),
       ],
     );

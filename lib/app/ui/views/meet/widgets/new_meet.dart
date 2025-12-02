@@ -2,6 +2,7 @@ import 'package:app_tasking/app/ui/components/btn/btn_cancel_second.dart';
 import 'package:app_tasking/app/ui/components/btn/btn_save_second.dart';
 import 'package:app_tasking/app/ui/components/dropdown/dropdown_select.dart';
 import 'package:app_tasking/app/ui/components/dropdown/option_select.dart';
+import 'package:app_tasking/app/ui/components/dropdown/search_inner_widget.dart';
 import 'package:app_tasking/app/ui/components/icon_wrapper.dart';
 import 'package:app_tasking/app/ui/components/input/input_date.dart';
 import 'package:app_tasking/app/ui/components/input/input_description.dart';
@@ -12,6 +13,7 @@ import 'package:app_tasking/app/ui/views/meet/meet_provider.dart';
 import 'package:app_tasking/app/ui/views/meet/widgets/list_person_selected.dart';
 import 'package:app_tasking/app/ui/views/meet/widgets/new_agenda.dart';
 import 'package:app_tasking/app/ui/components/input/web_date_picker_field.dart';
+import 'package:app_tasking/core/helpers/constant.dart';
 import 'package:app_tasking/core/helpers/helpers.dart';
 import 'package:app_tasking/core/theme/app_colors.dart';
 import 'package:app_tasking/core/theme/app_text_style.dart';
@@ -19,6 +21,7 @@ import 'package:app_tasking/domain/entities/area.dart';
 import 'package:app_tasking/domain/entities/person.dart';
 import 'package:app_tasking/domain/entities/project.dart';
 import 'package:app_tasking/infrastructure/models/option__select_model.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:duration_picker/duration_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -31,7 +34,6 @@ class NewMeet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final meetProvider = Provider.of<MeetProvider>(context);
-    
 
     Widget selectColor = Row(
       children: meetProvider.colors.map((color) {
@@ -136,82 +138,6 @@ class NewMeet extends StatelessWidget {
       },
     );
 
-    Widget timeMeet = InputDate(
-      helperText: 'Hora:',
-      icon: Bootstrap.clock,
-      hintText: "00:00",
-      textEditingController: meetProvider.ctrlTimeMeet,
-      onChanged: (value) {
-        meetProvider.ctrlTimeMeet.value;
-      },
-      inputFormats: [
-        FilteringTextInputFormatter.digitsOnly, // Solo números
-        TimeTextInputFormatter(),
-      ],
-      suffixIcon: IconWrapper(
-          onTap: () async {
-            TimeOfDay? pickedTime = await showTimePicker(
-              context: context,
-              initialTime: TimeOfDay.now(),
-            );
-            if (pickedTime != null) {
-              String formattedTime = Helpers.timeOfDayToString(
-                pickedTime,
-              ); //pickedTime.format(context);
-              meetProvider.ctrlTimeMeet.text = formattedTime;
-            }
-          },
-          child: Icon(
-            Clarity.clock_solid_badged,
-            size: 15.0,
-            color: AppColors.primary(context),
-          )),
-    );
-
-    Widget durationMeet = InputDate(
-      helperText: 'Duración:',
-      icon: Bootstrap.hourglass_split,
-      hintText: "00:00",
-      /* label: "Tiempo",
-      maxLength: 10, */
-      textEditingController: meetProvider.ctrlDurationMeet,
-      onChanged: (value) {
-        meetProvider.ctrlDurationMeet.value;
-      },
-      inputFormats: [
-        FilteringTextInputFormatter.digitsOnly, // Solo números
-        TimeTextInputFormatter(),
-      ],
-      /*    validator: (date) {
-        return null;
-      }, */
-      suffixIcon: IconWrapper(
-        onTap: () async {
-          final resultingDuration = await showDurationPicker(
-            context: context,
-            initialTime: meetProvider.duration,
-            baseUnit: BaseUnit.minute,
-            upperBound: const Duration(hours: 8),
-            lowerBound: const Duration(minutes: 15),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20.0),
-            ),
-          );
-          if (resultingDuration != null &&
-              resultingDuration != meetProvider.duration) {
-            meetProvider.ctrlDurationMeet.text = Helpers.formatDurationToHHMM(
-              resultingDuration,
-            );
-          }
-        },
-        child: Icon(
-          Clarity.clock_solid_badged,
-          size: 15.0,
-          color: AppColors.primary(context),
-        ),
-      ),
-    );
-
     return SizedBox(
       height: 800.0,
       child: /*  Scaffold(
@@ -222,11 +148,9 @@ class NewMeet extends StatelessWidget {
                   child: CircularProgressIndicator(),
                 )
               : Container(
-                color: AppColors.firstBackgroundContainer(context),
+                  color: AppColors.firstBackgroundContainer(context),
                   padding: const EdgeInsets.symmetric(
-                      vertical: 10.0, horizontal: 10.0
-                  
-                      ),
+                      vertical: 10.0, horizontal: 10.0),
                   child: SingleChildScrollView(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
@@ -251,9 +175,7 @@ class NewMeet extends StatelessWidget {
                                     ],
                                   ),
                                 ),
-                                SizedBox(
-                                    width: 250.0,
-                                    child: typeOfMeet)
+                                SizedBox(width: 250.0, child: typeOfMeet)
                               ],
                             ),
                           ),
@@ -284,115 +206,99 @@ class NewMeet extends StatelessWidget {
                           ),
                         ),
                         if (meetProvider.showAdvanceInputs)
-                        contentWithVerticalLine(
-                          context,
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            spacing: 30.0,
-                            children: [
-                              Row(
-                                children: [
-                                  _customsubTittle(
-                                    Bootstrap.pc_display_horizontal,
-                                    'Modalidad:',
-                                    context,
+                          contentWithVerticalLine(
+                            context,
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              spacing: 30.0,
+                              children: [
+                                Row(
+                                  children: [
+                                    _customsubTittle(
+                                      Bootstrap.pc_display_horizontal,
+                                      'Modalidad:',
+                                      context,
+                                    ),
+                                    SizedBox(width: 300, child: modeOfMeet)
+                                  ],
+                                ),
+                                if (meetProvider.modeOfMeet.id != '1')
+                                  Row(
+                                    children: [
+                                      _secondColumnInRow(
+                                        Bootstrap.geo_alt,
+                                        'Paltaforma:',
+                                        context,
+                                      ),
+                                      SizedBox(width: 300, child: placeMeet)
+                                    ],
                                   ),
-                                  SizedBox(
-                                      width: 300,
-                                      child: modeOfMeet)
-                                ],
-                              ),
-                              // SizedBox(
-                              //     width: 250,
-                              //     height: heightInputs,
-                              //     child: modeOfMeet),
-                              meetProvider.modeOfMeet.id != '0'
-                                  ? SizedBox(
-                                      width: 250,
-                                      child: meetingPlaceOther())
-                                  : Row(
-                                      children: [
-                                        _secondColumnInRow(
-                                          Bootstrap.geo_alt,
-                                          'Lugar:',
-                                          context,
-                                        ),
-                                        SizedBox(
-                                            width: 300,
-                                            child: placeMeet)
-                                      ],
-                                    )
-
-                              // ? SizedBox(
-                              //     width: 250,
-                              //     height: heightInputs,
-                              //     child: meetingPlaceOther())
-                              // : SizedBox(
-                              //     width: 250,
-
-                              //     height: heightInputs,
-                              //     child: placeMeet),
-                            ],
+                                Row(
+                                  children: [
+                                    _secondColumnInRow(
+                                      Bootstrap.geo,
+                                      'Especificar lugar',
+                                      context,
+                                    ),
+                                    SizedBox(
+                                        width: 250, child: meetingPlaceOther()),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
                         if (meetProvider.showAdvanceInputs)
-                        contentWithVerticalLine(
-                          context,
-                          Row(
-                            spacing: 30.0,
-                            children: [
-                              Row(
-                                children: [
-                                  _customsubTittle(
-                                    Bootstrap.star,
-                                    'Espacio de trabajo:',
-                                    context,
-                                  ),
-                                  SizedBox(
-                                      width: 300,
-                                      child: clientMeet())
-                                ],
-                              ),
-                              // SizedBox(
-                              //     width: 400.0,
-                              //     height: heightInputs,
-                              //     child: clientMeet()),
-                              Row(
-                                children: [
-                                  _secondColumnInRow(
-                                    Bootstrap.duffle,
-                                    'Proyecto:',
-                                    context,
-                                  ),
-                                  SizedBox(
-                                      width: 300,
-                                      child: projectMeet())
-                                ],
-                              ),
+                          contentWithVerticalLine(
+                            context,
+                            Row(
+                              spacing: 30.0,
+                              children: [
+                                Row(
+                                  children: [
+                                    _customsubTittle(
+                                      Bootstrap.star,
+                                      'Espacio de trabajo:',
+                                      context,
+                                    ),
+                                    SizedBox(width: 300, child: clientMeet())
+                                  ],
+                                ),
+                                // SizedBox(
+                                //     width: 400.0,
+                                //     height: heightInputs,
+                                //     child: clientMeet()),
+                                Row(
+                                  children: [
+                                    _secondColumnInRow(
+                                      Bootstrap.duffle,
+                                      'Proyecto:',
+                                      context,
+                                    ),
+                                    SizedBox(width: 300, child: projectMeet())
+                                  ],
+                                ),
 
-                              // SizedBox(
-                              //     width: 300.0,
-                              //     height: heightInputs,
-                              //     child: projectMeet()),
-                            ],
+                                // SizedBox(
+                                //     width: 300.0,
+                                //     height: heightInputs,
+                                //     child: projectMeet()),
+                              ],
+                            ),
                           ),
-                        ),
                         if (meetProvider.showAdvanceInputs)
-                        contentWithVerticalLine(
-                          context,
-                          Row(
-                            children: [
-                              _customsubTittle(
-                                Bootstrap.journal_text,
-                                'Responsable:',
-                                context,
-                              ),
-                              SizedBox(
-                                  width: 300,
-                                  child: responsibleInput())
-                            ],
+                          contentWithVerticalLine(
+                            context,
+                            Row(
+                              children: [
+                                _customsubTittle(
+                                  Bootstrap.person_raised_hand,
+                                  'Responsable:',
+                                  context,
+                                ),
+                                SizedBox(width: 300, child: responsibleInput())
+                              ],
+                            ),
                           ),
-                        ),
                         contentWithVerticalLine(
                           context,
                           Row(
@@ -402,13 +308,12 @@ class NewMeet extends StatelessWidget {
                               Row(
                                 children: [
                                   _customsubTittle(
-                                    Bootstrap.journal_text,
+                                    Bootstrap.people_fill,
                                     'Participantes:',
                                     context,
                                   ),
                                   SizedBox(
-                                      width: 300,
-                                      child: participantsInput())
+                                      width: 300, child: participantsInput())
                                 ],
                               ),
 
@@ -440,12 +345,9 @@ class NewMeet extends StatelessWidget {
                                       // meetProvider.justUpdateUi();
                                     },
                                   )),
+                              SizedBox(width: 250.0, child: timeMeet(context)),
                               SizedBox(
-                                  width: 250.0,
-                                  child: timeMeet),
-                              SizedBox(
-                                  width: 250.0,
-                                  child: durationMeet),
+                                  width: 250.0, child: durationMeet(context)),
                             ],
                           ),
                         ),
@@ -463,7 +365,6 @@ class NewMeet extends StatelessWidget {
                             ),
                           ),
                         ),
-
                         Align(
                           alignment: Alignment.centerLeft,
                           child: TextButton.icon(
@@ -477,21 +378,6 @@ class NewMeet extends StatelessWidget {
                             ),
                           ),
                         ),
-                        // TextButton(
-                        //   onPressed: () => meetProvider.changeWithAgenda(),
-                        //   child: Row(
-                        //     spacing: 5.0,
-                        //     children: [
-                        //       Text('Agenda',
-                        //           style: AppTextStyle(context).bold15(
-                        //               color: AppColors.secondary(context))),
-                        //       RotatingIcon(
-                        //         expanded: meetProvider.withAgenda,
-                        //         icon: Bootstrap.caret_down_fill,
-                        //       )
-                        //     ],
-                        //   ),
-                        // ),
                         meetProvider.withAgenda
                             ? const NewAgenda()
                             : const SizedBox()
@@ -499,35 +385,6 @@ class NewMeet extends StatelessWidget {
                     ),
                   ),
                 ),
-
-      /* floatingActionButton: Container(
-          // color: Colors.amber,
-          // margin: EdgeInsets.only(top: 100),
-          child: Row(
-            spacing: 20.0,
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              SizedBox(
-                width: 150.0,
-                child: BtnCancelSecond(
-                  text: 'Cancelar',
-                  onTap: () => Navigator.pop(context),
-                ),
-              ),
-              SizedBox(
-                width: 150.0,
-                child: BtnSaveSecond(
-                  loading: false,
-                  text:
-                      "Guardar", // subtaskController.isCreatingNote ? 'Enviando' : 'Guardar',
-                  showBoxShadow: false,
-                  onTap: () {},
-                ),
-              ),
-            ],
-          ),
-        ), */
-      // ),
     );
   }
 }
@@ -555,7 +412,7 @@ Widget _customsubTittle(IconData icon, String text, BuildContext context) {
 
 Widget _secondColumnInRow(IconData icon, String text, BuildContext context) {
   return SizedBox(
-    width: 100.0,
+    width: 130.0,
     child: Row(
       spacing: 8.0,
       children: [_customIcon(icon), _customLabel(text, context)],
@@ -610,6 +467,7 @@ class TimeTextInputFormatter extends TextInputFormatter {
 }
 
 Widget clientMeet() {
+  final searchController = TextEditingController();
   return Consumer<MeetProvider>(builder: (context, meetProvider, _) {
     return DropdownSelect(
       // helperText: 'Espacio de trabajo:',
@@ -627,15 +485,102 @@ Widget clientMeet() {
           ),
         );
       }).toList(),
+      dropdownSearchData: DropdownSearchData<Area>(
+          searchController: searchController,
+          searchInnerWidgetHeight: kDropdownHeight,
+          searchInnerWidget: SearchInnerWidget(
+            searchController: searchController,
+            hintText: 'Buscar cliente...',
+          ),
+          searchMatchFn: (item, searchValue) {
+            final p = item.value as Area;
+            return p.clienteNombre!
+                .toLowerCase()
+                .contains(searchValue.toLowerCase());
+          }),
       onChanged: (newValue) {
         meetProvider.clientMeet = newValue as Area;
+        meetProvider.getListProjects(meetProvider.clientMeet.clienteId);
       },
     );
   });
 }
 
+Widget projectMeet() {
+  final searchController = TextEditingController();
+  return Consumer<MeetProvider>(
+    builder: (context, meetProvider, _) {
+      final list = meetProvider.listProjects;
+      // Project? current = meetProvider.projectMeet;
+      // Asegurar que el value actual exista en la lista
+      // if (current == null ||
+      //     !list.any((p) => p.campanaid == current!.campanaid)) {
+      //   current = list.isNotEmpty ? list.first : null;
+      //   meetProvider.projectMeet = current!; // actualizar provider
+      // }
+      // if (meetProvider.isGettingListProjects) {
+      //   return const Center(
+      //     child: CircularProgressIndicator(),
+      //   );
+      // }
+      // Caso cuando la lista está vacía
+      if (list.isEmpty || meetProvider.isGettingListProjects) {
+        return const DropdownSelect(
+          label: 'Proyecto',
+          hint:
+              'Seleccione un espacio de trabajo para ver los proyectos disponibles',
+          value: null,
+          items: [],
+          // enabled: false, // Deshabilitado
+        );
+      }
+
+      return DropdownSelect(
+        // helperText: 'Proyecto:',
+        // icon: Bootstrap.duffle,
+        value: list.firstWhere(
+          (element) => element.campanaid == meetProvider.projectMeet.campanaid,
+          orElse: () => list.first, // valor por defecto
+        ),
+        items: list.map((element) {
+          return DropdownMenuItem(
+            value: element,
+            child: OptionSelect(
+              nameOption: element.campanaNombre ?? '',
+            ),
+          );
+        }).toList(),
+        dropdownSearchData: DropdownSearchData<Project>(
+          searchController: searchController,
+          searchInnerWidgetHeight: kDropdownHeight,
+          searchInnerWidget: SearchInnerWidget(
+            searchController: searchController,
+            hintText: 'Buscar espacio de trabajo...',
+          ),
+          searchMatchFn: (item, searchValue) {
+            final p = item.value as Project;
+            return p.campanaNombre!
+                .toLowerCase()
+                .contains(searchValue.toLowerCase());
+          },
+        ),
+        onMenuStateChange: (isOpen) {
+          if (!isOpen) {
+            searchController.clear();
+          }
+        },
+        onChanged: (newValue) {
+          meetProvider.projectMeet = newValue as Project;
+        },
+      );
+    },
+  );
+}
+
 Widget responsibleInput() {
+  final searchController = TextEditingController();
   return Consumer<MeetProvider>(builder: (context, meetProvider, _) {
+    print("ValueId: ${meetProvider.personResponsible.personalId}");
     return DropdownSelect(
       value: meetProvider.listPersonResponsible.firstWhere(
         (element) =>
@@ -651,14 +596,40 @@ Widget responsibleInput() {
           ),
         );
       }).toList(),
+      dropdownSearchData: DropdownSearchData<Person>(
+        searchController: searchController,
+        searchInnerWidgetHeight: kDropdownHeight,
+        searchInnerWidget: SearchInnerWidget(
+          searchController: searchController,
+          hintText: 'Buscar persona...',
+        ),
+        searchMatchFn: (item, searchValue) {
+          final p = item.value as Person;
+          return p.personalNombreCompleto!
+              .toLowerCase()
+              .contains(searchValue.toLowerCase());
+        },
+      ),
+      onMenuStateChange: (isOpen) {
+        if (!isOpen) {
+          searchController.clear();
+        }
+      },
       onChanged: (newValue) {
-        meetProvider.personResponsible = newValue as Person;
+        final person = newValue as Person;
+        if (person.personalId == meetProvider.personResponsible.personalId) {
+          return;
+        }
+        meetProvider.removeAndAddPersonToAgenda(
+            meetProvider.personResponsible, newValue);
+        meetProvider.personResponsible = person;
       },
     );
   });
 }
 
 Widget participantsInput() {
+  final searchController = TextEditingController();
   return Consumer<MeetProvider>(
     builder: (context, meetProvider, child) {
       return DropdownSelect(
@@ -676,35 +647,29 @@ Widget participantsInput() {
             ),
           );
         }).toList(),
+        dropdownSearchData: DropdownSearchData<Person>(
+          searchController: searchController,
+          searchInnerWidgetHeight: kDropdownHeight,
+          searchInnerWidget: SearchInnerWidget(
+            searchController: searchController,
+            hintText: 'Buscar persona...',
+          ),
+          searchMatchFn: (item, searchValue) {
+            final p = item.value as Person;
+            return p.personalNombreCompleto!
+                .toLowerCase()
+                .contains(searchValue.toLowerCase());
+          },
+        ),
+        onMenuStateChange: (isOpen) {
+          if (!isOpen) {
+            searchController.clear();
+          }
+        },
         onChanged: (newValue) {
           meetProvider.person = newValue as Person;
           meetProvider.removeOrAddPersonSelected(newValue);
-        },
-      );
-    },
-  );
-}
-
-Widget projectMeet() {
-  return Consumer<MeetProvider>(
-    builder: (context, meetProvider, _) {
-      return DropdownSelect(
-        // helperText: 'Proyecto:',
-        // icon: Bootstrap.duffle,
-        value: meetProvider.listProjects.firstWhere(
-          (element) => element.campanaid == meetProvider.projectMeet.campanaid,
-          orElse: () => meetProvider.listProjects.first, // valor por defecto
-        ),
-        items: meetProvider.listProjects.map((element) {
-          return DropdownMenuItem(
-            value: element,
-            child: OptionSelect(
-              nameOption: element.campanaNombre ?? '',
-            ),
-          );
-        }).toList(),
-        onChanged: (newValue) {
-          meetProvider.projectMeet = newValue as Project;
+          meetProvider.removeOrAddPeopleToAgenda(newValue);
         },
       );
     },
@@ -713,9 +678,9 @@ Widget projectMeet() {
 
 Widget meetingPlaceOther() {
   return Consumer<MeetProvider>(builder: (context, provider, _) {
-    return InputGen(
+    return InputTittle(
       onChanged: (_) {},
-      labelText: 'Especificar lugar',
+      // labelText: 'Especificar lugar',
       hintText: 'Oficina surco...',
       textEditingController: provider.ctrlMeetingPlace,
       // hintText: hintText
@@ -762,6 +727,108 @@ Widget contentWithVerticalLine(BuildContext context, Widget child) {
                 start: 15.0, top: 8.0, bottom: 8.0, end: 8.0),
             child: child),
       ],
+    ),
+  );
+}
+
+Widget timeMeet(BuildContext context) {
+  final meetProvider = Provider.of<MeetProvider>(context);
+  final FocusNode timeFocusNode = FocusNode();
+  timeFocusNode.addListener(() {
+    if (!timeFocusNode.hasFocus) {
+      final text = meetProvider.ctrlTimeMeet.text.trim();
+
+      // Solo formatear si se quedó vacío o incompleto
+      meetProvider.ctrlTimeMeet.text = Helpers.normalizeTimeText(text);
+    }
+  });
+
+  return InputDate(
+    helperText: 'Hora:',
+    icon: Bootstrap.clock,
+    hintText: "00:00",
+    textEditingController: meetProvider.ctrlTimeMeet,
+    onChanged: (value) {
+      // meetProvider.ctrlTimeMeet.value;
+    },
+    inputFormats: [
+      FilteringTextInputFormatter.digitsOnly, // Solo números
+      TimeTextInputFormatter(),
+    ],
+    focusNode: timeFocusNode, // ← Aquí
+    suffixIcon: IconWrapper(
+        onTap: () async {
+          TimeOfDay? pickedTime = await showTimePicker(
+            context: context,
+            initialTime: TimeOfDay.now(),
+          );
+          if (pickedTime != null) {
+            String formattedTime = Helpers.timeOfDayToString(
+              pickedTime,
+            ); //pickedTime.format(context);
+            meetProvider.ctrlTimeMeet.text = formattedTime;
+          }
+        },
+        child: Icon(
+          Clarity.clock_solid_badged,
+          size: 15.0,
+          color: AppColors.primary(context),
+        )),
+  );
+}
+
+Widget durationMeet(BuildContext context) {
+  final meetProvider = Provider.of<MeetProvider>(context);
+  final FocusNode timeFocusNode = FocusNode();
+  timeFocusNode.addListener(() {
+    if (!timeFocusNode.hasFocus) {
+      final text = meetProvider.ctrlDurationMeet.text.trim();
+      meetProvider.ctrlDurationMeet.text = Helpers.normalizeDurationText(text);
+    }
+  });
+
+  return InputDate(
+    helperText: 'Duración:',
+    icon: Bootstrap.hourglass_split,
+    hintText: "00:00",
+    /* label: "Tiempo",
+      maxLength: 10, */
+    focusNode: timeFocusNode,
+    textEditingController: meetProvider.ctrlDurationMeet,
+    onChanged: (value) {
+      meetProvider.ctrlDurationMeet.value;
+    },
+    inputFormats: [
+      FilteringTextInputFormatter.digitsOnly, // Solo números
+      TimeTextInputFormatter(),
+    ],
+    /*    validator: (date) {
+        return null;
+      }, */
+    suffixIcon: IconWrapper(
+      onTap: () async {
+        final resultingDuration = await showDurationPicker(
+          context: context,
+          initialTime: meetProvider.duration,
+          baseUnit: BaseUnit.minute,
+          upperBound: const Duration(hours: 8),
+          lowerBound: const Duration(minutes: 15),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20.0),
+          ),
+        );
+        if (resultingDuration != null &&
+            resultingDuration != meetProvider.duration) {
+          meetProvider.ctrlDurationMeet.text = Helpers.formatDurationToHHMM(
+            resultingDuration,
+          );
+        }
+      },
+      child: Icon(
+        Clarity.clock_solid_badged,
+        size: 15.0,
+        color: AppColors.primary(context),
+      ),
     ),
   );
 }

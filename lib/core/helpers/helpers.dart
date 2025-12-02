@@ -280,6 +280,36 @@ class Helpers {
     return "$formattedHours:$formattedMinutes";
   }
 
+  static String normalizeDurationText(String input) {
+    final digits = input.replaceAll(RegExp(r'[^0-9]'), '');
+
+    if (digits.isEmpty) return "00:00";
+
+    if (digits.length == 1) {
+      // 1 → 01:00
+      final hours = int.parse(digits).clamp(0, 99);
+      return "${hours.toString().padLeft(2, '0')}:00";
+    }
+
+    if (digits.length == 2) {
+      // 10 → 00:10
+      final minutes = int.parse(digits).clamp(0, 59);
+      return "00:${minutes.toString().padLeft(2, '0')}";
+    }
+
+    // 3 o 4 dígitos → HHMM
+    final padded = digits.padLeft(3, '0').padRight(4, '0').substring(0, 4);
+
+    int hours = int.parse(padded.substring(0, padded.length - 2));
+    int minutes = int.parse(padded.substring(padded.length - 2));
+
+    // Normaliza minutos
+    hours += minutes ~/ 60;
+    minutes = minutes % 60;
+
+    return "${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}";
+  }
+
   static String timeOfDayToString(TimeOfDay timeOfDay) {
     final now = DateTime.now();
     final dateTime = DateTime(
@@ -293,6 +323,26 @@ class Helpers {
     // final formatter = DateFormat('hh:mm');
     final formatter = DateFormat.Hm(); // <- formato 24 horas "HH:mm"
     return formatter.format(dateTime);
+  }
+
+  static String normalizeTimeText(String input) {
+    final digits = input.replaceAll(RegExp(r'[^0-9]'), '');
+
+    if (digits.isEmpty) return "00:00";
+
+    if (digits.length <= 2) {
+      // Solo horas
+      final hour = int.parse(digits).clamp(0, 23);
+      return "${hour.toString().padLeft(2, '0')}:00";
+    }
+
+    // 3 o 4 dígitos → HHmm
+    final padded = digits.padRight(4, '0').substring(0, 4);
+
+    final hour = int.parse(padded.substring(0, 2)).clamp(0, 23);
+    final minute = int.parse(padded.substring(2, 4)).clamp(0, 59);
+
+    return "${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}";
   }
 
   Color getCircleColor(int idValidacion) {
@@ -462,6 +512,7 @@ class Helpers {
 
   /* 📌 Cambiar formato de fecha de yyyy/MM/dd a dd/MM/yyyy */
   static String changeDateTodMy(String date) {
+    if (date.isEmpty) return '';
     DateFormat inputFormat =
         DateFormat('yyyy-MM-dd'); // Define el formato de entrada
     DateFormat outputFormat =
@@ -480,7 +531,6 @@ class Helpers {
         DateFormat('dd/MM/yyyy'); // Define el formato de entrada
     DateFormat outputFormat =
         DateFormat('yyyy-MM-dd'); // Define el formato de salida
-    
 
     DateTime dateTime =
         inputFormat.parse(date); // Convierte la cadena de texto a DateTime
@@ -488,7 +538,8 @@ class Helpers {
         dateTime); // Convierte DateTime de vuelta a la cadena de texto con el nuevo formato
     return formattedDateString;
   }
-   /* 📌 Cambiar formato de fecha de yyyy/MM/dd a dd/MM/yyyy */
+
+  /* 📌 Cambiar formato de fecha de yyyy/MM/dd a dd/MM/yyyy */
   static String ddMMyyyy(String? value) {
     if (value == null || value.isEmpty) return '';
     final date = DateTime.parse(value);
@@ -498,8 +549,6 @@ class Helpers {
         date); // Convierte DateTime de vuelta a la cadena de texto con el nuevo formato
     return formattedDateString;
   }
-  
-
 
   static String colorToHex(Color color) {
     int r = (color.r * 255).round();

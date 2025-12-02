@@ -1,4 +1,5 @@
 import 'package:app_tasking/app/providers/project_provider.dart';
+import 'package:app_tasking/app/providers/task_provider.dart';
 import 'package:app_tasking/app/ui/views/chat/chat_provider.dart';
 import 'package:app_tasking/app/ui/views/gantt/gantt_provider.dart';
 import 'package:app_tasking/app/ui/views/home/home_provider.dart';
@@ -41,7 +42,8 @@ void main() async {
         create: (_) => MyprofileProvider()),
     ChangeNotifierProvider<KanbanProvider>(create: (_) => KanbanProvider()),
     ChangeNotifierProvider<GanttProvider>(create: (_) => GanttProvider()),
-    ChangeNotifierProvider<AgreementProvider>(create: (_) => AgreementProvider()),
+    ChangeNotifierProvider<AgreementProvider>(
+        create: (_) => AgreementProvider()),
     ChangeNotifierProvider<ChatProvider>(
       create: (_) => ChatProvider(),
     ),
@@ -56,7 +58,9 @@ void main() async {
     ChangeNotifierProvider<ProjectProviderP>(
       create: (_) => ProjectProviderP(),
     ),
-    
+    ChangeNotifierProvider<TaskProviderP>(
+      create: (_) => TaskProviderP(),
+    ),
   ], child: const MyApp()));
 }
 

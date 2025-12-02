@@ -16,38 +16,90 @@ class TimelineHorizontal extends StatelessWidget {
           final event = events[index];
           final isUp = index % 2 == 0; // alternar arriba/abajo
 
-          return SizedBox(
-            width: 150,
+          return Container(
+            // color: Colors.red,
+            width: 165,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                if (isUp) _eventCard(event),
-
-                // Punto + línea
-                Column(
-                  children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: const BoxDecoration(
-                        color: Colors.orange,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    Container(
-                      width: 2,
-                      height: 40,
-                      color: Colors.orange,
-                    ),
-                  ],
-                ),
-
-                if (!isUp) _eventCard(event),
+                isUp
+                    ? Column(
+                        children: [
+                          Row(
+                            children: [
+                              _verticalLineFirst(),
+                              _eventCard(event),
+                            ],
+                          ),
+                          _horizontalLine(),
+                          const SizedBox(height: 50),
+                        ],
+                      )
+                    : Column(
+                        children: [
+                          const SizedBox(height: 48),
+                          _horizontalLine(),
+                          Row(
+                            children: [
+                              _eventCard(event),
+                              _verticalLineSecond(),
+                            ],
+                          ),
+                        ],
+                      )
               ],
             ),
           );
         },
       ),
+    );
+  }
+
+  Widget _horizontalLine() {
+    return Container(
+      // width: 40,
+      height: 2,
+      color: Colors.blue,
+    );
+  }
+
+  Widget _verticalLineFirst() {
+    return Column(
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: const BoxDecoration(
+            color: Colors.orange,
+            shape: BoxShape.circle,
+          ),
+        ),
+        Container(
+          width: 2,
+          height: 40,
+          color: Colors.orange,
+        ),
+      ],
+    );
+  }
+
+  Widget _verticalLineSecond() {
+    return Column(
+      children: [
+        Container(
+          width: 2,
+          height: 40,
+          color: Colors.orange,
+        ),
+        Container(
+          width: 8,
+          height: 8,
+          decoration: const BoxDecoration(
+            color: Colors.orange,
+            shape: BoxShape.circle,
+          ),
+        ),
+      ],
     );
   }
 

@@ -135,18 +135,14 @@ class AppTextStyle {
           fontSize: 16,
           fontFamily: 'Montserrat');
 
-  TextStyle bold15(
-          {Color? color,
-          FontWeight fontWeight = FontWeight.w700}) =>
+  TextStyle bold15({Color? color, FontWeight fontWeight = FontWeight.w700}) =>
       Theme.of(context).textTheme.bodyMedium!.copyWith(
           color: color,
           fontWeight: fontWeight,
           fontSize: 15,
           fontFamily: 'Montserrat');
 
-  TextStyle bold14(
-          {Color? color,
-          FontWeight fontWeight = FontWeight.w500}) =>
+  TextStyle bold14({Color? color, FontWeight fontWeight = FontWeight.w500}) =>
       Theme.of(context).textTheme.bodyMedium!.copyWith(
           color: color,
           fontWeight: fontWeight,
@@ -254,6 +250,15 @@ class AppTextStyle {
           color: color,
           fontWeight: FontWeight.w400,
           fontSize: 14,
+          fontFamily: 'Montserrat');
+
+  TextStyle medium13({
+    Color color = AppColors.grayLight,
+  }) =>
+      Theme.of(context).textTheme.bodyMedium!.copyWith(
+          color: color,
+          fontWeight: FontWeight.w400,
+          fontSize: 13,
           fontFamily: 'Montserrat');
 
   TextStyle medium12({

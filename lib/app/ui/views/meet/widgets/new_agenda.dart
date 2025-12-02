@@ -4,9 +4,11 @@ import 'package:app_tasking/app/ui/components/btn/btn_cancel_third.dart';
 import 'package:app_tasking/app/ui/components/custom_icon_button.dart';
 import 'package:app_tasking/app/ui/components/dropdown/dropdown_select.dart';
 import 'package:app_tasking/app/ui/components/dropdown/option_select.dart';
+import 'package:app_tasking/app/ui/components/dropdown/search_inner_widget.dart';
 import 'package:app_tasking/app/ui/components/input/input_tittle.dart';
 import 'package:app_tasking/app/ui/views/meet/meet_provider.dart';
 import 'package:app_tasking/app/ui/views/meet/widgets/table_agenda.dart';
+import 'package:app_tasking/core/helpers/constant.dart';
 import 'package:app_tasking/core/theme/app_colors.dart';
 import 'package:app_tasking/domain/entities/agenda.dart';
 import 'package:app_tasking/domain/entities/meet.dart';
@@ -28,30 +30,21 @@ class NewAgenda extends StatelessWidget {
     return Column(
       spacing: 10.0,
       children: [
-        // SizedBox(
-        //   height: (meetProvider.listAgendaAdd.length * 56.0) +
-        //       60, // 56 px por fila aprox
-        //   child: ClipRRect(
-        //     /* borderRadius: const BorderRadius.only(
-        //       topLeft: Radius.circular(10),
-        //       topRight: Radius.circular(10.0),
-        //     ), */
-        //     // borderRadius: BorderRadius.circular(10.0),
-        //     child: _TableAgenda(meetProvider.listAgendaAdd),
-        //   ),
-        // ),
         _TableAgenda(meetProvider.listAgendaAdd),
         Row(
           spacing: 20.0,
           children: [
-            Text('  0${meetProvider.reunDetId + 1}'),
+            Text(
+              '  ${(meetProvider.listAgendaAdd.length + 1).toString().padLeft(2, '0')}',
+            ),
             Expanded(
               child: Row(
                 spacing: 15.0,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 // mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Expanded(child: _inputTitle(context)), //input de titulo
+                  Expanded(
+                      flex: 2, child: _inputTitle(context)), //input de titulo
                   Expanded(child: _comboboxType(context)), //Combobox de tipo
                   meetProvider.typeOfAgenda.id == '1'
                       ? Expanded(child: _comboboxProject())
@@ -145,18 +138,33 @@ Widget _comboboxType(BuildContext context) {
 }
 
 Widget _comboboxResponsible() {
-  // final meetProvider = Provider.of<MeetProvider>(context);
+  final searchController = TextEditingController();
   return Consumer<MeetProvider>(
     builder: (context, meetProvider, _) {
+      final list = meetProvider.listPersonToAgenda;
+
+      // Caso cuando la lista está vacía
+      if (list.isEmpty) {
+        return const DropdownSelect(
+          label: 'Responsable',
+          hint:
+              'Añadir participantes en la reunión para poder seleccionar un responsable de agenda',
+          value: null,
+          items: [],
+          // enabled: false, // Deshabilitado
+        );
+      }
+      meetProvider.personAgenda = list.first; //Por unica vez al inicio
+      // Si la lista tiene datos
+      final selected = list.firstWhere(
+        (element) => element.personalId == meetProvider.personAgenda.personalId,
+        orElse: () => list.first,
+      );
+
       return DropdownSelect(
-        // helperText: 'Responsable',
         label: 'Responsable',
-        value: meetProvider.listPerson.firstWhere(
-          (element) =>
-              element.personalId == meetProvider.personAgenda.personalId,
-          orElse: () => meetProvider.listPerson.first, // valor por defecto
-        ),
-        items: meetProvider.listPerson.map((element) {
+        value: selected,
+        items: list.map((element) {
           return DropdownMenuItem(
             value: element,
             child: OptionSelect(
@@ -164,6 +172,25 @@ Widget _comboboxResponsible() {
             ),
           );
         }).toList(),
+        dropdownSearchData: DropdownSearchData<Person>(
+          searchController: searchController,
+          searchInnerWidgetHeight: kDropdownHeight,
+          searchInnerWidget: SearchInnerWidget(
+            searchController: searchController,
+            hintText: 'Buscar persona...',
+          ),
+          searchMatchFn: (item, searchValue) {
+            final p = item.value as Person;
+            return p.personalNombreCompleto!
+                .toLowerCase()
+                .contains(searchValue.toLowerCase());
+          },
+        ),
+        onMenuStateChange: (isOpen) {
+          if (!isOpen) {
+            searchController.clear();
+          }
+        },
         onChanged: (newValue) {
           meetProvider.personAgenda = newValue as Person;
         },
@@ -173,64 +200,57 @@ Widget _comboboxResponsible() {
 }
 
 Widget _comboboxProject() {
+  final searchController = TextEditingController();
+
   return Consumer<MeetProvider>(
     builder: (context, meetProvider, _) {
       return DropdownSelect<Project>(
         label: 'Proyecto:',
-        // helperText: 'Proyecto:',
-        icon: Bootstrap.duffle,
-        value: meetProvider.listProjects.firstWhere(
-          (element) => element.id == meetProvider.currentProjectAgenda.id,
-          orElse: () => meetProvider.listProjects.first, // valor por defecto
-        ),
-        items: meetProvider.listProjects.map((element) {
+        value: meetProvider.currentProjectAgenda.id == 0
+            ? null
+            : meetProvider.listProjects.firstWhere(
+                (p) => p.id == meetProvider.currentProjectAgenda.id,
+                orElse: () => meetProvider.listProjects.first,
+              ),
+        items: meetProvider.listProjects.map((project) {
           return DropdownMenuItem(
-            value: element,
-            child: OptionSelect(
-              nameOption: element.campanaNombre ?? element.campanaNombre ?? '',
-            ),
+            value: project,
+            child: OptionSelect(nameOption: project.campanaNombre ?? ''),
           );
         }).toList(),
-        onChanged: (newValue) {
-          meetProvider.currentProjectAgenda = newValue as Project;
+        onChanged: (value) {
+          meetProvider.currentProjectAgenda = value!;
           meetProvider.getTasks();
         },
-        // 👇 Aquí agregamos la búsqueda
-        searchData: DropdownSearchData<Project>(
-          searchInnerWidgetHeight: 50,
-          searchInnerWidget: Padding(
-            padding: const EdgeInsets.all(8),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Buscar proyecto...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                isDense: true,
-              ),
-              onChanged: (query) {
-                // Opcional si deseas filtrar manualmente
-              },
-            ),
+        dropdownSearchData: DropdownSearchData<Project>(
+          searchController: searchController,
+          searchInnerWidgetHeight: kDropdownHeight,
+          searchInnerWidget: SearchInnerWidget(
+            searchController: searchController,
+            hintText: 'Buscar proyecto...',
           ),
-
-          // 👇 Esto establece por qué campo se filtra AUTOMÁTICAMENTE
           searchMatchFn: (item, searchValue) {
-            final project = item.value as Project;
-            return project.campanaNombre!
+            final p = item.value as Project;
+            return p.campanaNombre!
                 .toLowerCase()
                 .contains(searchValue.toLowerCase());
           },
         ),
+        onMenuStateChange: (isOpen) {
+          if (!isOpen) {
+            searchController.clear();
+          }
+        },
       );
     },
   );
 }
 
 Widget _comboboxTasks() {
+  final searchController = TextEditingController();
   return Consumer<MeetProvider>(
     builder: (context, meetProvider, _) {
-      return DropdownSelect(
+      return DropdownSelect<Task>(
         label: 'Tarea:',
         // helperText: 'Proyecto:',
         icon: Bootstrap.duffle,
@@ -250,12 +270,32 @@ Widget _comboboxTasks() {
         onChanged: (newValue) {
           meetProvider.currentTaskAgenda = newValue as Task;
         },
+        dropdownSearchData: DropdownSearchData<Task>(
+          searchController: searchController,
+          searchInnerWidgetHeight: kDropdownHeight,
+          searchInnerWidget: SearchInnerWidget(
+            searchController: searchController,
+            hintText: 'Buscar tarea...',
+          ),
+          searchMatchFn: (item, searchValue) {
+            final p = item.value as Task;
+            return p.ordenProduccionTrabajoRealizar!
+                .toLowerCase()
+                .contains(searchValue.toLowerCase());
+          },
+        ),
+        onMenuStateChange: (isOpen) {
+          if (!isOpen) {
+            searchController.clear();
+          }
+        },
       );
     },
   );
 }
 
 Widget _comboboxMeets() {
+  final searchController = TextEditingController();
   return Consumer<MeetProvider>(
     builder: (context, meetProvider, _) {
       return DropdownSelect(
@@ -275,6 +315,25 @@ Widget _comboboxMeets() {
             ),
           );
         }).toList(),
+        dropdownSearchData: DropdownSearchData<Meet>(
+          searchController: searchController,
+          searchInnerWidgetHeight: kDropdownHeight,
+          searchInnerWidget: SearchInnerWidget(
+            searchController: searchController,
+            hintText: 'Buscar reunión...',
+          ),
+          searchMatchFn: (item, searchValue) {
+            final p = item.value as Meet;
+            return p.reunionTitulo!
+                .toLowerCase()
+                .contains(searchValue.toLowerCase());
+          },
+        ),
+        onMenuStateChange: (isOpen) {
+          if (!isOpen) {
+            searchController.clear();
+          }
+        },
         onChanged: (newValue) {
           meetProvider.currentMeetAgenda = newValue as Meet;
         },
@@ -303,8 +362,8 @@ class _TableAgenda extends StatelessWidget {
               context,
               'Nro     ',
             ),
-            Expanded(flex: 3, child: _textHeader(context, 'Tema de agenda')),
-            Expanded(child: _textHeader(context, 'Tipo')),
+            Expanded(flex: 2, child: _textHeader(context, 'Tema de agenda')),
+            SizedBox(width: 100, child: _textHeader(context, 'Tipo')),
             Expanded(child: _textHeader(context, 'Asociado a')),
             Expanded(child: _textHeader(context, 'Responsable')),
             const SizedBox(width: 100),
@@ -317,7 +376,8 @@ class _TableAgenda extends StatelessWidget {
               itemBuilder: (context, index) {
                 final newAgenda = listAgenda[index];
                 return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 5.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 15.0, vertical: 5.0),
                   margin: const EdgeInsets.only(top: 8.0),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10.0),
@@ -329,8 +389,8 @@ class _TableAgenda extends StatelessWidget {
                       SizedBox(
                           width: 50,
                           child: Text("${index + 1}".padLeft(2, '0'))),
-                      Expanded(flex: 3, child: Text(newAgenda.tittle ?? "-")),
-                      Expanded(child: Text(newAgenda.type ?? "-")),
+                      Expanded(flex: 2, child: Text(newAgenda.tittle ?? "-")),
+                      SizedBox(width: 100, child: Text(newAgenda.type ?? "-")),
                       Expanded(
                           child: Text(newAgenda.associatedTypeName ?? "-")),
                       Expanded(child: Text(newAgenda.responsibleNames ?? "-")),

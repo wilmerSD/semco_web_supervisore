@@ -176,7 +176,8 @@ class _MeetExpandableTileState extends State<MeetExpandableTile> {
                     children: [
                       _subTittleChild(context, 'N.', width: 50.0),
                       _subTittleChild(context, 'Nombre', width: 350.0),
-                      _subTittleChild(context, 'Estado', width: 150),
+                      _subTittleChild(context, 'Área de trabajo', width: 250),
+                      _subTittleChild(context, 'Estado', width: 100),
                       _subTittleChild(
                         context,
                         'Fecha',
@@ -207,8 +208,11 @@ class _MeetExpandableTileState extends State<MeetExpandableTile> {
                             _contentChild(
                                 context, childMeet.reunionTitulo ?? '',
                                 width: 350.0),
+                            _contentChild(
+                                context, childMeet.reunionClienteNombre ?? '',
+                                width: 250.0),
                             _contentChild(context, childMeet.meetStateDesc!,
-                                width: 150.0),
+                                width: 100.0),
                             _contentChild(
                                 context,
                                 Helpers.formateDateTimeEsp(
@@ -263,7 +267,12 @@ Widget _contentChild(BuildContext context, String text,
     {double? width = 200.0}) {
   return SizedBox(
     width: width,
-    child: Text(text, style: AppTextStyle(context).bold14()),
+    child: Text(
+      text,
+      style: AppTextStyle(context).bold14(),
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+    ),
   );
 }
 

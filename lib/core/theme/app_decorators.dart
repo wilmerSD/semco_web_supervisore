@@ -4,9 +4,26 @@ import 'package:app_tasking/core/theme/app_text_style.dart';
 import 'package:flutter/material.dart';
 
 class AppDecorators {
-    static InputDecoration inputDecorationGen(
-      BuildContext context, String hintText, String labelText, Widget? suffixIcon) {
+  static InputDecoration inputDecorationGen(BuildContext context,
+      String hintText, String labelText, Widget? suffixIcon, bool isMandatory) {
     return InputDecoration(
+      label: RichText(
+        text: TextSpan(
+          text: labelText,
+          style: TextStyle(color: Colors.grey[700]),
+          children: isMandatory
+              ? const [
+                  WidgetSpan(
+                    child: SizedBox(width: 5),
+                  ),
+                  TextSpan(
+                    text: "*",
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ]
+              : null,
+        ),
+      ),
       suffixIcon: suffixIcon,
       counterText: "",
       filled: false,
@@ -25,9 +42,8 @@ class AppDecorators {
       ),
       hintText: hintText,
       hintStyle: AppTextStyle(context).medium14(
-        color: AppColors.textBasic(context),
+        color: AppColors.grayBlue,
       ),
-      labelText: labelText,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(kSizeLittle),
       ),
@@ -48,9 +64,26 @@ class AppDecorators {
     );
   }
 
-   static InputDecoration inputDecorationComboBox(
-      BuildContext context, String hintText, String labelText, Widget? suffixIcon) {
+  static InputDecoration inputDecorationComboBox(BuildContext context,
+      String hintText, String labelText, Widget? suffixIcon, bool isMandatory) {
     return InputDecoration(
+      label: RichText(
+        text: TextSpan(
+          text: labelText,
+          style: TextStyle(color: Colors.grey[700]),
+          children: isMandatory
+              ? const [
+                  WidgetSpan(
+                    child: SizedBox(width: 5),
+                  ),
+                  TextSpan(
+                    text: "*",
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ]
+              : null,
+        ),
+      ),
       suffixIcon: suffixIcon,
       counterText: "",
       filled: false,
@@ -71,7 +104,7 @@ class AppDecorators {
       hintStyle: AppTextStyle(context).medium14(
         color: AppColors.textBasic(context),
       ),
-      labelText: labelText,
+      // labelText: labelText,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(kSizeLittle),
       ),
@@ -91,5 +124,4 @@ class AppDecorators {
       ),
     );
   }
-
 }

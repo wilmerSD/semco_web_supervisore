@@ -17,7 +17,8 @@ class InputDate extends StatelessWidget {
       this.readOnly = false,
       this.helperText,
       this.icon,
-      this.isMandatory = false});
+      this.isMandatory = false,
+      this.focusNode});
   final TextEditingController textEditingController;
   final Function(String) onChanged;
   final Widget? suffixIcon;
@@ -28,6 +29,7 @@ class InputDate extends StatelessWidget {
   final String? helperText;
   final IconData? icon;
   final bool isMandatory;
+  final FocusNode? focusNode;
 
   @override
   Widget build(BuildContext context) {
@@ -61,21 +63,21 @@ class InputDate extends StatelessWidget {
           : const SizedBox(),
       Expanded(
         child: TextFormField(
-            style: AppTextStyle(context)
-                .bold13(color: AppColors.textBasic(context)),
-            maxLength: 10,
-            readOnly: readOnly ?? false,
-            onChanged: (value) => onChanged(value),
-            controller: textEditingController,
-            textAlignVertical: TextAlignVertical.center,
-            keyboardType: TextInputType.multiline,
-            maxLines: 1,
-            minLines: 1,
-            inputFormatters: inputFormats,
-            decoration: AppDecorators.inputDecorationGen(
-                  context, hintText ?? "", '', null),
-            
-            ),
+          focusNode: focusNode,
+          style:
+              AppTextStyle(context).bold13(color: AppColors.textBasic(context)),
+          maxLength: 10,
+          readOnly: readOnly ?? false,
+          onChanged: (value) => onChanged(value),
+          controller: textEditingController,
+          textAlignVertical: TextAlignVertical.center,
+          keyboardType: TextInputType.multiline,
+          maxLines: 1,
+          minLines: 1,
+          inputFormatters: inputFormats,
+          decoration: AppDecorators.inputDecorationGen(
+              context, hintText ?? "", '', null, isMandatory),
+        ),
       )
     ]);
   }

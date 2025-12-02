@@ -13,7 +13,8 @@ extension Environment on ENV {
         return {
           "enviroment": "DESAROLLO",
           // "baseUrl": "http://localhost/backend_tasking_v1NETFrameworkSQLServer/General",
-          "baseUrl": "http://192.168.100.8/backend_tasking_v1NETFrameworkSQLServer/General",
+          "baseUrl":
+              "http://192.168.100.125/backend_tasking_v1NETFrameworkSQLServer/General",
           "connectTimeout": 600000,
           "receiveTimeout": 600000,
           "sendTimeout": 600000,
@@ -28,14 +29,14 @@ extension Environment on ENV {
       case ENV.PROD:
         return {
           "enviroment": "PRODUCCIÓN",
-          "baseUrl": 'https://app.task-ing.com/api_task_kanban_prod/General', 
+          "baseUrl": 'https://app.task-ing.com/api_task_kanban_prod/General',
           "connectTimeout": 600000,
           "receiveTimeout": 600000,
         };
-       case ENV.DEMO:
+      case ENV.DEMO:
         return {
           "enviroment": "DEMO",
-          "baseUrl": 'https://app.task-ing.com/api_task_demo/General', 
+          "baseUrl": 'https://app.task-ing.com/api_task_demo/General',
           "connectTimeout": 600000,
           "receiveTimeout": 600000,
         };

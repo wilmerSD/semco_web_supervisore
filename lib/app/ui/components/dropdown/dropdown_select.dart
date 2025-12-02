@@ -27,7 +27,8 @@ class DropdownSelect<T> extends StatelessWidget {
     this.isMandatory = false,
     this.icon,
     this.hintTextSearch,
-    this.searchData,
+    this.dropdownSearchData,
+    this.onMenuStateChange,
   });
   final String? label;
   final String? hint;
@@ -49,7 +50,8 @@ class DropdownSelect<T> extends StatelessWidget {
   final bool isMandatory;
   final IconData? icon;
   final String? hintTextSearch;
-  final DropdownSearchData<T>? searchData;
+  final DropdownSearchData<T>? dropdownSearchData;
+  final void Function(bool)? onMenuStateChange;
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -84,22 +86,8 @@ class DropdownSelect<T> extends StatelessWidget {
         Expanded(
           child: DropdownButtonHideUnderline(
             child: DropdownButtonFormField2<T>(
-              dropdownSearchData: searchData != null ? DropdownSearchData(
-              // searchController: searchController,
-              searchInnerWidgetHeight: 50,
-              searchInnerWidget: Padding(
-                padding: const EdgeInsets.all(8),
-                child: TextField(
-                  // controller: searchController,
-                  decoration: InputDecoration(
-                    hintText: hintTextSearch ?? 'Buscar...',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    isDense: true,
-                  ),
-                ),
-              )) : null,
+              dropdownSearchData: dropdownSearchData,
+              onMenuStateChange: onMenuStateChange,
               iconStyleData: const IconStyleData(
                 icon: Icon(Icons.arrow_drop_down,
                     color: AppColors.grayBlue, size: 20),
@@ -112,13 +100,16 @@ class DropdownSelect<T> extends StatelessWidget {
               isExpanded: true,
               selectedItemBuilder: selectedItemBuilder,
               decoration: AppDecorators.inputDecorationComboBox(
-                  context, hintText ?? "", label ?? '', null),
-              hint: Text(hint ?? "Seleccione",
-                  style: TextStyle(
-                      fontSize: 9,
-                      color: isActive
-                          ? AppColors.textBasic(context)
-                          : AppColors.textBasic(context))),
+                  context, hintText ?? "", label ?? '', null, isMandatory),
+              hint: Text(
+                hint ?? "Seleccione",
+                style: TextStyle(
+                    fontSize: 9,
+                    color: isActive
+                        ? AppColors.textBasic(context)
+                        : AppColors.textBasic(context)),
+                overflow: TextOverflow.ellipsis,
+              ),
 
               items: items,
               validator: validator,
@@ -126,7 +117,7 @@ class DropdownSelect<T> extends StatelessWidget {
                   autoValidate ?? AutovalidateMode.onUserInteraction,
               onChanged: onChanged,
               dropdownStyleData: DropdownStyleData(
-                maxHeight: height ?? 200.0,
+                maxHeight: height ?? 300.0,
                 useSafeArea: false,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(14),
@@ -146,8 +137,9 @@ class DropdownSelect<T> extends StatelessWidget {
               ),
 
               menuItemStyleData: MenuItemStyleData(
-                height: 35,
-                padding: EdgeInsets.only(left: isPadLeft ?? 14.0, right: 0),
+                height: 45,
+                padding: EdgeInsets.symmetric(
+                    horizontal: isPadLeft ?? 10.0, vertical: 5),
               ),
 
               // onTap: onTap

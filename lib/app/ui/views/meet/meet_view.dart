@@ -2,6 +2,7 @@ import 'package:app_tasking/app/providers/project_provider.dart';
 import 'package:app_tasking/app/ui/components/custom_app_bar.dart';
 import 'package:app_tasking/app/ui/views/meet/meet_provider.dart';
 import 'package:app_tasking/app/ui/views/meet/views/meet_view_desktop.dart';
+import 'package:app_tasking/infrastructure/models/project_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -18,7 +19,7 @@ class _MeetViewState extends State<MeetView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final meetProvider = Provider.of<MeetProvider>(context, listen: false);
       meetProvider.onInit();
-      context.read<ProjectProviderP>().getListProjects();
+      context.read<ProjectProviderP>().getListProjects(context, ProjectModel());
     });
     super.initState();
   }
